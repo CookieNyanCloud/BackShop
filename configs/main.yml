@@ -1,0 +1,38 @@
+http:
+  port: 8090
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+cache:
+  ttl: 3600s
+
+postgres:
+  host:     "localhost"
+  port:     "5432"
+  username: "postgres"
+  dbname:   "postgres"
+  SSLMode:  "disable"
+
+auth:
+  accessTokenTTL: 15m
+  refreshTokenTTL: 30m
+  verificationCodeLength: 10
+
+limiter:
+  rps: 10
+  burst: 2
+  ttl: 1000m
+
+smtp:
+  port: 587
+  host: "smtp.gmail.com"
+  from: "email123check@gmail.com"
+
+email:
+  templates:
+    verification_email: "./templates/verification_email.html"
+    purchase_successful: "./templates/purchase_successful.html"
+  subjects:
+    verification_email: "Спасибо за регистрацию, %s!"
+    purchase_successful: "Покупка прошла успешно!"
