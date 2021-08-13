@@ -72,8 +72,10 @@ func (r *UsersRepo) GetByCredentials(ctx context.Context, email, password string
 
 func (r *UsersRepo) GetUserInfo(ctx context.Context, id int) (domain.User, error) {
 	var user domain.User
-	query := fmt.Sprintf("SELECT id = $1FROM %s ", usersTable)
+	println("repid:",id)
+	query := fmt.Sprintf("SELECT * FROM %s where id = $1", usersTable)
 	err:= r.db.Get(&user, query, id)
+	println("rep", user.Email)
 	return user, err
 }
 

@@ -116,9 +116,12 @@ func Init(configsDir string) (*Config, error) {
 		return nil, err
 	}
 	setFromEnv(&cfg)
-	println(cfg.Email.Templates.Verification)
-	println(cfg.SMTP.Host)
-	println(cfg.Email.Subjects.Verification)
+	println(cfg.Postgres.DBName)
+	println(cfg.Postgres.SSLMode)
+	println(cfg.Postgres.Host)
+	println(cfg.Postgres.Password)
+	println(cfg.Postgres.Username)
+	println(cfg.Postgres.Port)
 	return &cfg, nil
 }
 

@@ -20,7 +20,9 @@ func getUserId(c*gin.Context) (int, error)  {
 }
 
 func (h *Handler) userIdentity (c *gin.Context)  {
+	println("auth")
 	id, err := h.parseAuthHeader(c)
+	println("id:",id)
 	if err != nil {
 		newResponse(c, http.StatusUnauthorized, err.Error())
 	}
@@ -38,9 +40,6 @@ func (h *Handler) adminIdentity(c *gin.Context) {
 
 func (h *Handler) parseAuthHeader(c *gin.Context) (string, error) {
 	header := c.GetHeader(authorizationHeader)
-	println("A111111111111111111", header)
-
-	println(header)
 	if header == ""{
 		println("no header")
 		return "", nil

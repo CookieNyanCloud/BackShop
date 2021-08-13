@@ -112,12 +112,15 @@ func (h *Handler) userSignIn(c *gin.Context) {
 }
 
 func (h *Handler) userGetOwnInfo(c *gin.Context) {
+	println("userinfo1")
 	userId, _:= getUserId(c)
+	println("userinfo2",userId)
 	user, err := h.services.Users.GetUserInfo(c, userId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	println("userinfo1",user.ID)
 	println("Sdsdsdsd")
 	println(user.Email)
 	c.JSON(http.StatusOK, userInfoResponse{
