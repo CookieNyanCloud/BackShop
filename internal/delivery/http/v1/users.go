@@ -21,7 +21,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 			authenticated.POST("/verify/:code", h.userVerify)
 			own := authenticated.Group("/own")
 			{
-				own.GET("/info",h.userGetOwnInfo)
+				own.GET("/info", h.userGetOwnInfo)
 				//schools.PUT("/:id", h.userUpdateZone)
 			}
 		}
@@ -42,7 +42,6 @@ type signInInput struct {
 type refreshInput struct {
 	Token string `json:"token" binding:"required"`
 }
-
 
 func (h *Handler) userSignUp(c *gin.Context) {
 	var inp userSignUpInput
@@ -84,6 +83,8 @@ func (h *Handler) userSignUp(c *gin.Context) {
 		AccessToken:  res.AccessToken,
 		RefreshToken: res.RefreshToken,
 	})
+	println(res.AccessToken)
+	println(res.RefreshToken)
 
 }
 
@@ -113,14 +114,14 @@ func (h *Handler) userSignIn(c *gin.Context) {
 
 func (h *Handler) userGetOwnInfo(c *gin.Context) {
 	println("userinfo1")
-	userId, _:= getUserId(c)
-	println("userinfo2",userId)
+	userId, _ := getUserId(c)
+	println("userinfo2", userId)
 	user, err := h.services.Users.GetUserInfo(c, userId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	println("userinfo1",user.ID)
+	println("userinfo1", user.ID)
 	println("Sdsdsdsd")
 	println(user.Email)
 	c.JSON(http.StatusOK, userInfoResponse{

@@ -44,13 +44,17 @@ func (m *Manager) Parse(accessToken string) (string, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
+		println(accessToken)
+		println("asasas")
+		println(err.Error())
+		println("dwdwd")
 		return "", err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return "", fmt.Errorf("error get user claims from token")
 	}
-	println("cl",claims["sub"].(string))
+	println("cl", claims["sub"].(string))
 	return claims["sub"].(string), nil
 }
 

@@ -10,21 +10,22 @@ import (
 
 const (
 	authorizationHeader = "authorization"
-	userCtx = "userId"
-	adminCtx   = "adminId"
-	jwt = "jwt"
+	userCtx             = "userId"
+	adminCtx            = "adminId"
+	jwt                 = "jwt"
 )
 
-func getUserId(c*gin.Context) (int, error)  {
+func getUserId(c *gin.Context) (int, error) {
 	return getIdByContext(c, userCtx)
 }
 
-func (h *Handler) userIdentity (c *gin.Context)  {
+func (h *Handler) userIdentity(c *gin.Context) {
 	println("auth")
 	id, err := h.parseAuthHeader(c)
-	println("id:",id)
+	println("id:", id)
 	if err != nil {
 		newResponse(c, http.StatusUnauthorized, err.Error())
+		println("")
 	}
 	c.Set(userCtx, id)
 }
@@ -32,6 +33,9 @@ func (h *Handler) userIdentity (c *gin.Context)  {
 func (h *Handler) adminIdentity(c *gin.Context) {
 	id, err := h.parseAuthHeader(c)
 	if err != nil {
+		println("asasas")
+		println(err.Error())
+		println("dwdwd")
 		newResponse(c, http.StatusUnauthorized, err.Error())
 	}
 
@@ -40,7 +44,8 @@ func (h *Handler) adminIdentity(c *gin.Context) {
 
 func (h *Handler) parseAuthHeader(c *gin.Context) (string, error) {
 	header := c.GetHeader(authorizationHeader)
-	if header == ""{
+	println(header)
+	if header == "" {
 		println("no header")
 		return "", nil
 	}
@@ -54,11 +59,11 @@ func (h *Handler) parseAuthHeader(c *gin.Context) (string, error) {
 	return h.tokenManager.Parse(headerParts[1])
 }
 
-func getIdByContext(c *gin.Context, context string) ( int, error) {
-	str:= c.GetString(context)
-	strIntId, err:= strconv.Atoi(str)
-	if err!=nil {
-		return 0, errors.New("studentCtx not found")
+func getIdByContext(c *gin.Context, context string) (int, error) {
+	str := c.GetString(context)
+	strIntId, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, errors.New("Ctx not found")
 	}
 	return strIntId, nil
 }
