@@ -15,6 +15,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 		users.POST("/sign-up", h.userSignUp)
 		users.POST("/sign-in", h.userSignIn)
 		users.POST("/auth/refresh", h.userRefresh)
+		//users.get("/auth/refresh", h.userRefresh)
 
 		authenticated := users.Group("/", h.userIdentity)
 		{
@@ -40,7 +41,8 @@ type signInInput struct {
 }
 
 type refreshInput struct {
-	Token string `json:"token" binding:"required"`
+	Authorization string `header:"refreshToken" json:"refreshToken" binding:"required"`
+	ContentType string `header:"ContentType" json:"ContentType"`
 }
 
 func (h *Handler) userSignUp(c *gin.Context) {
@@ -131,18 +133,27 @@ func (h *Handler) userGetOwnInfo(c *gin.Context) {
 }
 
 func (h *Handler) userRefresh(c *gin.Context) {
+	println("1")
 	var inp refreshInput
-	if err := c.BindJSON(&inp); err != nil {
+	authorizationHeader:= c.GetHeader(refreshToken)
+	println("asas",authorizationHeader)
+	if err := c.BindHeader(&inp); err != nil {
+	//if inp.refreshToken =c.GetHeader("refreshToken");inp.refreshToken ==""{
+		println(err.Error())
 		newResponse(c, http.StatusBadRequest, "invalid input body")
+		println("2")
+		println(inp.Authorization)
 		return
 	}
-	res, err := h.services.Users.RefreshTokens(c.Request.Context(), inp.Token)
+	println(inp.Authorization)
+	res, err := h.services.Users.RefreshTokens(c.Request.Context(), inp.Authorization)
+	//res, err := h.services.Users.RefreshTokens(c.Request.Context(), inpH)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
-
+		println("3")
 		return
 	}
-
+	println("4")
 	c.JSON(http.StatusOK, tokenResponse{
 		AccessToken:  res.AccessToken,
 		RefreshToken: res.RefreshToken,

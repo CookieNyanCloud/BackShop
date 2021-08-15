@@ -21,7 +21,8 @@ auth:
 
 limiter:
   rps: 10
-  burst: 2
+#todo:was 2
+  burst: 4
   ttl: 1000m
 
 smtp:

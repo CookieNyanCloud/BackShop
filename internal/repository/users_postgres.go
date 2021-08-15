@@ -54,12 +54,13 @@ func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (int, erro
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
-	//query = fmt.Sprintf("INSERT INTO %s (userid, refreshtoken, expiresat) values ($1, $2, $3)",
-	//	sessionsTable)
-	//_, err := r.db.Exec(query, id, nil,nil)
-	//if err != nil {
-	//	return 0, err
-	//}
+	println("SDSDSDSDSDS")
+	query = fmt.Sprintf("INSERT INTO %s (id, refreshtoken, expiresat) values ($1, $2, $3)",
+		sessionsTable)
+	_, err := r.db.Exec(query, id, nil,nil)
+	if err != nil {
+		return 0, err
+	}
 	return id, nil
 }
 
@@ -88,6 +89,7 @@ func (r *UsersRepo) SetSession(ctx context.Context, userId string, session domai
 		sessionsTable)
 	userIdInt, err := strconv.Atoi(userId)
 	_, err = r.db.Exec(query, session.RefreshToken, session.ExpiresAt, time.Now(), userIdInt)
+	println("asas")
 	println(session.RefreshToken)
 	return err
 }

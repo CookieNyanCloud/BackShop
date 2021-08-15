@@ -13,6 +13,7 @@ const (
 	userCtx             = "userId"
 	adminCtx            = "adminId"
 	jwt                 = "jwt"
+	refreshToken        = "refreshToken"
 )
 
 func getUserId(c *gin.Context) (int, error) {
@@ -24,8 +25,8 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	id, err := h.parseAuthHeader(c)
 	println("id:", id)
 	if err != nil {
+		println(err.Error())
 		newResponse(c, http.StatusUnauthorized, err.Error())
-		println("")
 	}
 	c.Set(userCtx, id)
 }
@@ -33,9 +34,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 func (h *Handler) adminIdentity(c *gin.Context) {
 	id, err := h.parseAuthHeader(c)
 	if err != nil {
-		println("asasas")
 		println(err.Error())
-		println("dwdwd")
 		newResponse(c, http.StatusUnauthorized, err.Error())
 	}
 

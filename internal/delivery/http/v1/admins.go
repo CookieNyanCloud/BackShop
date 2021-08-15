@@ -52,7 +52,7 @@ func (h *Handler) adminRefresh(c *gin.Context) {
 		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-	res, err := h.services.Admins.RefreshTokens(c.Request.Context(), inp.Token)
+	res, err := h.services.Admins.RefreshTokens(c.Request.Context(), inp.Authorization)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -34,8 +34,8 @@ CREATE TABLE if not exists sessions
 (
     id           int  not null unique,
     refreshtoken varchar(255),
-    expiresat    date not null,
-    lastvisitat  date not null
+    expiresat    date,
+    lastvisitat  date
 
 );
 
