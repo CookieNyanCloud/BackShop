@@ -24,7 +24,7 @@ type tokenResponse struct {
 }
 
 type userInfoResponse struct {
-	userInfo interface{} `json:"userInfo"`
+	UserInfo interface{} `json:"userInfo"`
 
 }
 

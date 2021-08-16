@@ -48,9 +48,9 @@ func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (int, erro
 	if is, err := r.IsDuplicate(user.Email, user.Name); is || err != nil {
 		return 0, ErrUserAlreadyExists
 	}
-	query := fmt.Sprintf("INSERT INTO %s (email, name, password_hash) values ($1, $2, $3) RETURNING id",
+	query := fmt.Sprintf("INSERT INTO %s (email, name, password_hash, verification) values ($1, $2, $3, &4) RETURNING id",
 		usersTable)
-	row := r.db.QueryRow(query, user.Email, user.Name, user.Password)
+	row := r.db.QueryRow(query, user.Email, user.Name, user.Password, false)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -71,12 +71,29 @@ func (r *UsersRepo) GetByCredentials(ctx context.Context, email, password string
 	return user, err
 }
 
+
+
 func (r *UsersRepo) GetUserInfo(ctx context.Context, id int) (domain.User, error) {
 	var user domain.User
+	var idzone int
+	var zone []domain.Zone
 	println("repid:", id)
 	//query := fmt.Sprintf("SELECT * FROM %s where id = $1", usersTable)
-	query := fmt.Sprintf(`SELECT id FROM %s where id = $1`, usersTable)
-	err := r.db.Get(&user, query, id)
+	query := fmt.Sprintf(`SELECT email FROM %s where id = $1`, usersTable)
+	err := r.db.Get(&user.Email, query, id)
+	query = fmt.Sprintf(`SELECT name FROM %s where id = $1`, usersTable)
+	err = r.db.Get(&user.Name, query, id)
+	query = fmt.Sprintf(`SELECT verification FROM %s where id = $1`, usersTable)
+	err = r.db.Get(&user.Verification.Verified, query, id)
+	query = fmt.Sprintf(`SELECT zone FROM %s where id = $1`, usersTable)
+	err = r.db.Get(&idzone, query, id)
+	query = fmt.Sprintf(`SELECT zone FROM %s where id = $1`, zonesTable)
+	err = r.db.Get(&zone, query, idzone)
+	user.ID=id
+	println(user.Email)
+	println(user.Name)
+	println(user.Verification.Verified)
+	println(idzone)
 	//var email string
 	//row:=r.db.QueryRow(query,id)
 	//err := row.Scan(&user)

@@ -65,5 +65,5 @@ func (m *Manager) NewRefreshToken() (string, error) {
 	if _, err := r.Read(b); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%x", b), nil
+	return fmt.Sprintf("%x%x", b,), nil
 }
