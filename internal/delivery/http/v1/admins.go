@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,12 +14,12 @@ func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 	{
 		admins.POST("/sign-in", h.adminSignIn)
 		admins.POST("/auth/refresh", h.adminRefresh)
-		//authenticated := admins.Group("/", h.adminIdentity)
-		//{
-		//	authenticated.POST("", h.adminCreateEvent)
-		//	authenticated.DELETE("/:id", h.adminDeleteCourse)
-		//	authenticated.PUT("/:id", h.adminUpdateEvent)
-		//}
+		authenticated := admins.Group("/", h.adminIdentity)
+		{
+			authenticated.POST("", h.adminCreateEvent)
+			authenticated.DELETE("/:id", h.adminDeleteCourse)
+			authenticated.PUT("/:id", h.adminUpdateEvent)
+		}
 	}
 }
 
@@ -63,35 +64,20 @@ func (h *Handler) adminRefresh(c *gin.Context) {
 	})
 }
 
-type createCourseInput struct {
+type createEventInput struct {
 	Time        time.Time     `json:"time" db:"time"`
 	Description string        `json:"description" db:"description"`
 	//MapFile     string        `json:"mapfile" db:"mapfile"`
-	Zones       []int `json:"zones" db:"zones"`
+	Zones       []domain.Zone `json:"zones" db:"zones"`
 }
 
-//func (h *Handler) adminCreateEvent(c *gin.Context) {
-//	var inp createCourseInput
-//
-//	if err := c.BindJSON(&inp); err != nil {
-//		newResponse(c, http.StatusBadRequest, "invalid input body")
-//		return
-//	}
-//
-//	//school, err := getSchoolFromContext(c)
-//	if err != nil {
-//		//newResponse(c, http.StatusInternalServerError, err.Error())
-//
-//		return
-//	}
-//
-//	//id, err := h.services.Courses.Create(c.Request.Context(), school.ID, inp.Name)
-//	if err != nil {
-//		//newResponse(c, http.StatusInternalServerError, err.Error())
-//
-//		return
-//	}
-//
-//	c.JSON(http.StatusCreated, idResponse{id})
-//
-//}
+func (h *Handler) adminCreateEvent(c *gin.Context) {
+	var inp createEventInput
+	if err := c.BindJSON(&inp); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
+	id, err := h.services.Admins.CreareEvent()
+	c.JSON(http.StatusCreated, idResponse{id})
+
+}

@@ -55,7 +55,6 @@ func (h *Handler) takeZone(c *gin.Context) {
 		newResponse(c, http.StatusBadRequest, "invalid id param")
 		return
 	}
-
 	zones, err := h.services.Zones.TakeZoneById(idEventInt,idZoneInt,userId)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
