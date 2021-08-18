@@ -48,9 +48,10 @@ func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (int, erro
 	if is, err := r.IsDuplicate(user.Email, user.Name); is || err != nil {
 		return 0, ErrUserAlreadyExists
 	}
-	query := fmt.Sprintf("INSERT INTO %s (email, name, password_hash, verification) values ($1, $2, $3, &4) RETURNING id",
+	ver:=false
+	query := fmt.Sprintf("INSERT INTO %s (email, name, password_hash, verification) values ($1, $2, $3, $4) RETURNING id",
 		usersTable)
-	row := r.db.QueryRow(query, user.Email, user.Name, user.Password, false)
+	row := r.db.QueryRow(query, user.Email, user.Name, user.Password, ver)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
