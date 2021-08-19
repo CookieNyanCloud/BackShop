@@ -2,11 +2,9 @@ package v1
 
 import (
 	"errors"
-	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
@@ -16,9 +14,9 @@ func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 		admins.POST("/auth/refresh", h.adminRefresh)
 		authenticated := admins.Group("/", h.adminIdentity)
 		{
-			authenticated.POST("", h.adminCreateEvent)
-			authenticated.DELETE("/:id", h.adminDeleteCourse)
-			authenticated.PUT("/:id", h.adminUpdateEvent)
+			authenticated.POST("/create-event", h.adminCreateEvent)
+			//authenticated.DELETE("/:id", h.adminDeleteCourse)
+			//authenticated.PUT("/:id", h.adminUpdateEvent)
 		}
 	}
 }
@@ -64,20 +62,24 @@ func (h *Handler) adminRefresh(c *gin.Context) {
 	})
 }
 
-type createEventInput struct {
-	Time        time.Time     `json:"time" db:"time"`
-	Description string        `json:"description" db:"description"`
-	//MapFile     string        `json:"mapfile" db:"mapfile"`
-	Zones       []domain.Zone `json:"zones" db:"zones"`
-}
+//type createEventInput struct {
+//	Time        time.Time     `json:"time" db:"time"`
+//	Description string        `json:"description" db:"description"`
+//	//MapFile     string        `json:"mapfile" db:"mapfile"`
+//	Zones       []domain.Zone `json:"zones" db:"zones"`
+//}
 
 func (h *Handler) adminCreateEvent(c *gin.Context) {
-	var inp createEventInput
+	var inp service.CreateEventInput
 	if err := c.BindJSON(&inp); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-	id, err := h.services.Admins.CreareEvent()
+	id, err := h.services.Admins.CreateEvent(inp)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, "cold not create event")
+		return
+	}
 	c.JSON(http.StatusCreated, idResponse{id})
 
 }

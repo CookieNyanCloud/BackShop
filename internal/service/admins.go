@@ -88,3 +88,7 @@ func (s *AdminsService) RefreshTokens(ctx context.Context, refreshToken string) 
 	IdStr:= strconv.Itoa(user.ID)
 	return s.createSession(ctx, IdStr)
 }
+
+func (s *AdminsService) CreateEvent(input CreateEventInput) (int, error){
+	return s.repo.CreateEvent(input.Time, input.Description, input.Zones)
+}

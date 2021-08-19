@@ -22,6 +22,7 @@ func (r *AdminsRepo) GetByCredentials(ctx context.Context, email, password strin
 	query := fmt.Sprintf("SELECT id FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
 	err:= r.db.Get(&admin, query,email,password)
 	return admin, err
+//todo:admin hash
 }
 
 func (r *AdminsRepo) SetSession(ctx context.Context, adminId string, session domain.Session) error {
@@ -39,3 +40,25 @@ func (r *AdminsRepo) GetByRefreshToken(ctx context.Context, refreshToken string)
 	err:= r.db.Get(&user, query,refreshToken)
 	return user, err
 }
+
+func (r *AdminsRepo) CreateEvent(time time.Time, description string, zones []domain.Zone) (int, error){
+	var id int
+	query := fmt.Sprintf("INSERT INTO %s (time) values ($1) RETURNING id",
+		eventsTable)
+	row := r.db.QueryRow(query, time)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+	for _, zone:= range zones {
+		query = fmt.Sprintf("INSERT INTO %s (eventId,taken,price) values ($1, $2, $3)",
+			zonesTable)
+		_, err := r.db.Exec(query, id, false , zone.Price)
+		println("range", zone.Price)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return id, nil
+//	todo:check
+}
+

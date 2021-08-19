@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 const (
@@ -18,6 +19,7 @@ type Admins interface {
 	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
 	SetSession(ctx context.Context, userId string, session domain.Session) error
 	GetByRefreshToken(ctx context.Context, refreshToken string) (domain.User, error)
+	CreateEvent(time time.Time, description string, zones []domain.Zone) (int, error)
 }
 
 type Users interface {

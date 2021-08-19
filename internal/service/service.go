@@ -39,10 +39,10 @@ type PurchaseSuccessfulEmailInput struct {
 }
 
 type CreateEventInput struct {
-	Time        time.Time
-	Description string
+	Time        time.Time     `json:"time" db:"time"`
+	Description string        `json:"description" db:"description"`
 	//MapFile     string        `json:"mapfile" db:"mapfile"`
-	Zones []domain.Zone
+	Zones       []domain.Zone `json:"zones" db:"zones"`
 }
 
 type Tokens struct {
@@ -61,7 +61,7 @@ type Users interface {
 type Admins interface {
 	SignIn(ctx context.Context, input UserSignInInput) (Tokens, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
-	CreareEvent(ctx context.Context, input CreateEventInput) (int, error)
+	CreateEvent(input CreateEventInput) (int, error)
 }
 
 type Events interface {
