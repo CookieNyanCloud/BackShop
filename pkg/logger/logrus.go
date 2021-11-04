@@ -4,8 +4,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO create general interface with generic fields
-
 func Debug(msg ...interface{}) {
 	logrus.Debug(msg...)
 }

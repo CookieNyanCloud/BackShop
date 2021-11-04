@@ -8,7 +8,6 @@ import (
 	"github.com/cookienyancloud/back/pkg/auth"
 	"github.com/cookienyancloud/back/pkg/hash"
 	"github.com/cookienyancloud/back/pkg/otp"
-	"strconv"
 	"time"
 )
 
@@ -52,24 +51,19 @@ func (s *UsersService) SignUp(ctx context.Context, input UserSignUpInput) error 
 	}
 	verificationCode := s.otpGenerator.RandomSecret(s.verificationCodeLength)
 	user := domain.User{
-		Name:     input.Name,
 		Password: passwordHash,
 		Email:    input.Email,
-		Verification: domain.Verification{
-			Code: verificationCode,
-		},
 	}
 	if _, err := s.repo.CreateUser(ctx, user); err != nil {
 		if err == repository.ErrUserAlreadyExists {
-			return ErrUserAlreadyExists
+			return errUserAlreadyExists
 		}
 		return err
 	}
-	//return s.emailService.SendUserVerificationEmail(VerificationEmailInput{
-	//	Email:            user.Email,
-	//	Name:             user.Name,
-	//	VerificationCode: verificationCode,
-	//})
+	return s.emailService.SendUserVerificationEmail(VerificationEmailInput{
+		Email:            user.Email,
+		VerificationCode: verificationCode,
+	})
 	return nil
 }
 
@@ -81,11 +75,10 @@ func (s *UsersService) SignIn(ctx context.Context, input UserSignInInput) (Token
 	user, err := s.repo.GetByCredentials(ctx, input.Email, passwordHash)
 	if err != nil {
 		if err == repository.ErrUserNotFound {
-			return Tokens{}, ErrUserNotFound
+			return Tokens{}, errUserNotFound
 		}
 	}
-	IdStr:= strconv.Itoa(user.ID)
-	return s.createSession(ctx, IdStr)
+	return s.createSession(ctx, user.ID)
 }
 
 func (s *UsersService) RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error) {
@@ -93,8 +86,7 @@ func (s *UsersService) RefreshTokens(ctx context.Context, refreshToken string) (
 	if err != nil {
 		return Tokens{}, err
 	}
-	IdStr:= strconv.Itoa(user.ID)
-	return s.createSession(ctx, IdStr)
+	return s.createSession(ctx, user.ID)
 }
 
 func (s *UsersService) createSession(ctx context.Context, userId string) (Tokens, error) {
@@ -123,7 +115,7 @@ func (s *UsersService) createSession(ctx context.Context, userId string) (Tokens
 	return res, err
 }
 
-func (s *UsersService) GetUserInfo(ctx context.Context, id int) (domain.User, error) {
+func (s *UsersService) GetUserInfo(ctx context.Context, id string) (domain.User, error) {
 	user, err := s.repo.GetUserInfo(ctx, id)
 	if err != nil {
 		if err == repository.ErrUserNotFound {

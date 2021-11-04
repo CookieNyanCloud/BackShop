@@ -44,11 +44,6 @@ func (m *Manager) Parse(accessToken string) (string, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
-		println(accessToken)
-		println("asasas")
-		println(err.Error())
-		println("dwdwd")
-		return "", err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {

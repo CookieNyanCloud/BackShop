@@ -20,8 +20,8 @@ const (
 
 type (
 	Config struct {
-		Environment string
 		Postgres    PostgresConfig
+		FireStore   FireStoreConfig
 		HTTP        HTTPConfig
 		Auth        AuthConfig
 		Email       EmailConfig
@@ -38,6 +38,11 @@ type (
 		DBName   string
 		SSLMode  string
 		Password string
+	}
+
+	FireStoreConfig struct {
+		ProjectId       string
+		CredentialsPath string
 	}
 
 	AuthConfig struct {
@@ -100,9 +105,8 @@ type (
 	}
 )
 
-func Init(configsDir string) (*Config, error) {
+func Init(configsDir string, local bool) (*Config, error) {
 	populateDefaults()
-
 	if err := parseEnv(); err != nil {
 		return nil, err
 	}
@@ -217,6 +221,7 @@ func parsePostgresEnvVariables() error {
 	viper.SetEnvPrefix("postgres")
 	return viper.BindEnv("pass")
 }
+
 func parsePasswordFromEnv() error {
 	viper.SetEnvPrefix("password")
 	return viper.BindEnv("salt")

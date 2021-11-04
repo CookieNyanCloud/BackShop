@@ -9,7 +9,7 @@ import (
 	"github.com/cookienyancloud/back/internal/server"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/cookienyancloud/back/pkg/auth"
-	"github.com/cookienyancloud/back/pkg/cache"
+	//"github.com/cookienyancloud/back/pkg/cache"
 	"github.com/cookienyancloud/back/pkg/database/postgres"
 	"github.com/cookienyancloud/back/pkg/email/smtp"
 	"github.com/cookienyancloud/back/pkg/hash"
@@ -24,27 +24,32 @@ import (
 	"time"
 )
 
-func Run(configPath string) {
+//todo: idempotent api
+//todo: cache
 
-	cfg, err := config.Init(configPath)
+
+func Run(configPath string, local bool) {
+
+	cfg, err := config.Init(configPath, local)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	postgresClient, err := postgres.NewClient(cfg.Postgres)
+	dataBaseClient, err := postgres.NewClient(cfg.Postgres)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
-	memCache := cache.NewMemoryCache()
+	//memCache := cache.NewMemoryCache()
 
 	hasher := hash.NewSHA1Hasher(cfg.Auth.PasswordSalt)
 
-	emailProvider := smtp.NewClient(memCache)
 
 	paymentProvider := fondy.NewFondyClient(cfg.Payment.Fondy.MerchantId, cfg.Payment.Fondy.MerchantPassword)
+
+	//emailProvider := smtp.NewClient(memCache)
 
 	emailSender, err := smtp.NewSMTPSender(
 		cfg.SMTP.From,
@@ -63,14 +68,13 @@ func Run(configPath string) {
 
 	otpGenerator := otp.NewGOTPGenerator()
 
-	repos := repository.NewRepositories(postgresClient)
+	repos := repository.NewRepositories(dataBaseClient)
 
 	services := service.NewServices(service.Deps{
 		Repos:                  repos,
-		Cache:                  memCache,
 		Hasher:                 hasher,
 		TokenManager:           tokenManager,
-		EmailProvider:          emailProvider,
+		//EmailProvider:          emailProvider,
 		EmailSender:            emailSender,
 		EmailConfig:            config.EmailConfig{},
 		PaymentProvider:        paymentProvider,
@@ -110,7 +114,7 @@ func Run(configPath string) {
 		logger.Errorf("failed to stop server: %v", err)
 	}
 
-	if err := postgresClient.Close(); err != nil {
+	if err := dataBaseClient.Close(); err != nil {
 		logrus.Errorf("error occurred on db connection close: %s", err.Error())
 	}
 

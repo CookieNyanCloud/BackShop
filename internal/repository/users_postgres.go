@@ -2,13 +2,11 @@ package repository
 
 import (
 	"context"
-	"strconv"
-	"time"
-
-	//"errors"
 	"fmt"
 	"github.com/cookienyancloud/back/internal/domain"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 type UsersRepo struct {
@@ -19,104 +17,92 @@ func NewUsersRepo(db *sqlx.DB) *UsersRepo {
 	return &UsersRepo{db: db}
 }
 
-func (r *UsersRepo) IsDuplicate(email, name string) (bool, error) {
-	id := -1
-	println("1", id)
-	query := fmt.Sprintf("SELECT id FROM %s WHERE name='$1'", usersTable)
-	//err:= r.db.Get(&id, query, name)
-	_ = r.db.Get(&id, query, name)
-	println("2", id)
-	//if err != nil {
-	//	return true, err
-	//}
-	println("3", id)
-	query = fmt.Sprintf("SELECT id FROM %s WHERE 'email'='$1'", usersTable)
-	//err= r.db.Get(&id, query, email)
+func (r *UsersRepo) IsDuplicate(email string) bool {
+	var id string
+	query := fmt.Sprintf("SELECT id FROM %s WHERE email='$1'", usersTable)
 	_ = r.db.Get(&id, query, email)
-	//if err != nil {
-	//	return true, err
-	//}
-	if id > -1 {
-		return true, nil
-
+	query = fmt.Sprintf("SELECT id FROM %s WHERE 'email'='$1'", usersTable)
+	if id == "" {
+		return true
 	}
-	return false, nil
+	return false
 }
 
-func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (int, error) {
-	var id int
-	if is, err := r.IsDuplicate(user.Email, user.Name); is || err != nil {
-		return 0, ErrUserAlreadyExists
+func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (string, error) {
+	id := uuid.New().String()
+	if is := r.IsDuplicate(user.Email); is {
+		return "", ErrUserAlreadyExists
 	}
-	ver:=false
-	query := fmt.Sprintf("INSERT INTO %s (email, name, password_hash, verification) values ($1, $2, $3, $4) RETURNING id",
+	query := fmt.Sprintf("INSERT INTO %s (id, email, password_hash) values ($1, $2, $3)",
 		usersTable)
-	row := r.db.QueryRow(query, user.Email, user.Name, user.Password, ver)
-	if err := row.Scan(&id); err != nil {
-		return 0, err
+	_, err := r.db.Exec(query, user.Email, user.Password)
+	if err != nil {
+		return "", err
 	}
-	println("SDSDSDSDSDS")
 	query = fmt.Sprintf("INSERT INTO %s (id, refreshtoken, expiresat) values ($1, $2, $3)",
 		sessionsTable)
-	_, err := r.db.Exec(query, id, nil,nil)
+	_, err = r.db.Exec(query, id, nil, nil)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	return id, nil
 }
 
-func (r *UsersRepo) GetByCredentials(ctx context.Context, email, password string) (domain.User, error) {
-	var user domain.User
-	query := fmt.Sprintf("SELECT id FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
-	err := r.db.Get(&user, query, email, password)
-	return user, err
+func (r *UsersRepo) SetVerCode(ctx context.Context, id uuid.UUID, code, email string) error {
+	query := fmt.Sprintf("INSERT INTO %s (id, code, state ) values ($1, $2, $3)",
+		verificationTable)
+	_, err := r.db.Exec(query, id, code, email)
+	if err != nil {
+		return err
+	}
+	go r.DeleteIfNotVer(id)
+	return nil
 }
 
+func (r *UsersRepo) DeleteIfNotVer(id uuid.UUID) {
+	time.After(time.Minute * 10)
+	var state bool
+	query := fmt.Sprintf("SELECT state FROM %s WHERE id=$1", verificationTable)
+	_ = r.db.Get(&state, query, id)
+	if !state {
+		query := fmt.Sprintf("DELETE FROM %s WHERE id=$1",
+			verificationTable)
+		_, _ = r.db.Exec(query, id)
+		query = fmt.Sprintf("DELETE FROM %s WHERE id=$1",
+			usersTable)
+		_, _ = r.db.Exec(query, id)
+		query = fmt.Sprintf("DELETE FROM %s WHERE id=$1",
+			sessionsTable)
+		_, _ = r.db.Exec(query, id)
+	}
+}
 
+//func (r *UsersRepo) GetByCredentials(ctx context.Context, email, password string) (uuid.UUID, error) {
+//	var id uuid.UUID
+//	query := fmt.Sprintf("SELECT id FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
+//	err := r.db.Get(&id, query, email, password)
+//	return id, err
+//}
 
-func (r *UsersRepo) GetUserInfo(ctx context.Context, id int) (domain.User, error) {
+func (r *UsersRepo) GetUserInfo(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	var user domain.User
-	var idzone int
-	var zone []domain.Zone
-	println("repid:", id)
-	//query := fmt.Sprintf("SELECT * FROM %s where id = $1", usersTable)
 	query := fmt.Sprintf(`SELECT email FROM %s where id = $1`, usersTable)
 	err := r.db.Get(&user.Email, query, id)
-	query = fmt.Sprintf(`SELECT name FROM %s where id = $1`, usersTable)
-	err = r.db.Get(&user.Name, query, id)
-	query = fmt.Sprintf(`SELECT verification FROM %s where id = $1`, usersTable)
-	err = r.db.Get(&user.Verification.Verified, query, id)
-	query = fmt.Sprintf(`SELECT zone FROM %s where id = $1`, usersTable)
-	err = r.db.Get(&idzone, query, id)
-	query = fmt.Sprintf(`SELECT zone FROM %s where id = $1`, zonesTable)
-	err = r.db.Get(&zone, query, idzone)
-	user.ID=id
-	println(user.Email)
-	println(user.Name)
-	println(user.Verification.Verified)
-	println(idzone)
-	//var email string
-	//row:=r.db.QueryRow(query,id)
-	//err := row.Scan(&user)
-	println("rep", user.Email)
 	return user, err
 }
 
-func (r *UsersRepo) SetSession(ctx context.Context, userId string, session domain.Session) error {
+func (r *UsersRepo) SetSession(ctx context.Context, userId uuid.UUID, session domain.Session) error {
 	query := fmt.Sprintf("UPDATE %s SET refreshtoken = $1, expiresat = $2, lastvisitat = $3 WHERE id = $4",
 		sessionsTable)
-	userIdInt, err := strconv.Atoi(userId)
-	_, err = r.db.Exec(query, session.RefreshToken, session.ExpiresAt, time.Now(), userIdInt)
-	println("asas")
-	println(session.RefreshToken)
+	_, err := r.db.Exec(query, session.RefreshToken, session.ExpiresAt, time.Now(), userId)
 	return err
 }
 
-func (r *UsersRepo) GetByRefreshToken(ctx context.Context, refreshToken string) (domain.User, error) {
-	var user domain.User
+func (r *UsersRepo) GetByRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error) {
+	var id uuid.UUID
 	query := fmt.Sprintf("SELECT id FROM %s WHERE refreshtoken=$1", sessionsTable)
-	err := r.db.Get(&user, query, refreshToken)
-	return user, err
+	err := r.db.Get(&id, query, refreshToken)
+	return id, err
 }
 
 func (r *UsersRepo) Verify(ctx context.Context, userId string, hash string) error {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/cookienyancloud/back/internal/app"
 	_ "github.com/lib/pq"
 )
@@ -8,5 +9,8 @@ import (
 const configsDir = "configs"
 
 func main() {
-	app.Run(configsDir)
+	var local bool
+	flag.BoolVar(&local, "local", false, "хост")
+	flag.Parse()
+	app.Run(configsDir, local)
 }

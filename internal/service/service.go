@@ -53,7 +53,7 @@ type Tokens struct {
 type Users interface {
 	SignUp(ctx context.Context, input UserSignUpInput) error
 	SignIn(ctx context.Context, input UserSignInInput) (Tokens, error)
-	GetUserInfo(ctx context.Context, id int) (domain.User, error)
+	GetUserInfo(ctx context.Context, id string) (domain.User, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	Verify(ctx context.Context, userId, hash string) error
 }

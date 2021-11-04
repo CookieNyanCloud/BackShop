@@ -13,6 +13,5 @@ func IsEmailValid(email string) bool {
 	if len(email) < minEmailLen || len(email) > maxEmailLen {
 		return false
 	}
-
 	return emailRegex.MatchString(email)
 }

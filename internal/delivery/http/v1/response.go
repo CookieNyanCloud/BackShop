@@ -7,7 +7,6 @@ import (
 
 type dataResponse struct {
 	Data interface{} `json:"data"`
-	//Id   int         `json:"id"`
 }
 
 type idResponse struct {
@@ -25,9 +24,7 @@ type tokenResponse struct {
 
 type userInfoResponse struct {
 	UserInfo interface{} `json:"userInfo"`
-
 }
-
 
 func newResponse(c *gin.Context, statusCode int, message string) {
 	logger.Error(message)

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -16,14 +15,12 @@ const (
 	refreshToken        = "refreshToken"
 )
 
-func getUserId(c *gin.Context) (int, error) {
-	return getIdByContext(c, userCtx)
+func getUserId(c *gin.Context) string {
+	return c.GetString(userCtx)
 }
 
 func (h *Handler) userIdentity(c *gin.Context) {
-	println("auth")
 	id, err := h.parseAuthHeader(c)
-	println("id:", id)
 	if err != nil {
 		println(err.Error())
 		newResponse(c, http.StatusUnauthorized, err.Error())
@@ -56,13 +53,4 @@ func (h *Handler) parseAuthHeader(c *gin.Context) (string, error) {
 		return "", nil
 	}
 	return h.tokenManager.Parse(headerParts[1])
-}
-
-func getIdByContext(c *gin.Context, context string) (int, error) {
-	str := c.GetString(context)
-	strIntId, err := strconv.Atoi(str)
-	if err != nil {
-		return 0, errors.New("Ctx not found")
-	}
-	return strIntId, nil
 }
