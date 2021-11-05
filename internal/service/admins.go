@@ -83,3 +83,7 @@ func (s *AdminsService) CreateEvent(ctx context.Context, input CreateEventInput)
 		Zones:       input.Zones,
 	})
 }
+
+func (s *AdminsService)	IsAdmin(ctx context.Context, id string) (bool, error) {
+	return s.repo.IsAdmin(ctx,id)
+}

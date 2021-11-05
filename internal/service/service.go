@@ -54,11 +54,11 @@ type Admins interface {
 	RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 	CreateEvent(ctx context.Context, input CreateEventInput) error
 	createSession(ctx context.Context, adminId string) (Tokens, error)
+	IsAdmin(ctx context.Context, id string) (bool, error)
 	//GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
 	//SetSession(ctx context.Context, id string, session domain.Session) error
 	//GetByRefreshToken(ctx context.Context, refreshToken string) (string, error)
 	//IsDuplicate(email string) bool
-	//IsAdmin(ctx context.Context, id string) (bool, error)
 	//AddNewAdmin(ctx context.Context, email, passwordHash string) error
 	//DeleteEvent(ctx context.Context, id int) error
 	//DeleteUser(ctx context.Context, id string) error
