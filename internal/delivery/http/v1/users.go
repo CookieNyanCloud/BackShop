@@ -2,10 +2,19 @@ package v1
 
 import (
 	"errors"
-	"github.com/cookienyancloud/back/internal/repository"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+)
+
+var (
+	errUserAlreadyExists       = errors.New("user with such email already exists")
+	errUserNotFound            = errors.New("user doesn't exists")
+	errVerificationCodeInvalid = errors.New("verification code is invalid")
+
+	noId            = "no id"
+	noCode          = "code is empty"
+	errInvalidInput = "invalid input body"
 )
 
 func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
@@ -114,7 +123,7 @@ func (h *Handler) userVerify(c *gin.Context) {
 		return
 	}
 	if err := h.services.Users.Verify(c.Request.Context(), id, code); err != nil {
-		if errors.Is(err, repository.ErrVerificationCodeInvalid) {
+		if errors.Is(err, errVerificationCodeInvalid) {
 			newResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}

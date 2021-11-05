@@ -2,11 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"time"
+)
+
+var (
+	errUserAlreadyExists = errors.New("user with such email already exists")
 )
 
 type UsersRepo struct {
@@ -31,7 +36,7 @@ func (r *UsersRepo) IsDuplicate(email string) bool {
 func (r *UsersRepo) CreateUser(ctx context.Context, user domain.User) (string, error) {
 	id := uuid.New().String()
 	if is := r.IsDuplicate(user.Email); is {
-		return "", ErrUserAlreadyExists
+		return "", errUserAlreadyExists
 	}
 	query := fmt.Sprintf("INSERT INTO %s (id, email, password_hash) values ($1, $2, $3)",
 		usersTable)

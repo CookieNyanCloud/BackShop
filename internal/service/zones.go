@@ -17,6 +17,6 @@ func (s *ZonesService) GetZonesByEventId(id int) ([]domain.Zone, error) {
 	return s.repo.GetZonesByEventId(id)
 }
 
-func (s *ZonesService) TakeZoneById(idEvent, idZone, userId int) ([]domain.Zone, error) {
-	return s.repo.TakeZoneById(idEvent, idZone, userId)
+func (s *ZonesService) TakeZoneById(idEvent int, idZones []int, userId string) ([]domain.Zone, error) {
+	return s.repo.TakeZonesById(idEvent, idZones, userId)
 }

@@ -36,12 +36,13 @@ type Users interface {
 }
 
 type Events interface {
-	GetEvent() ([]domain.Event, error)
+	GetEventById(id int) (domain.Event, error)
+	GetAllEvents() ([]domain.Event, error)
 }
 
 type Zones interface {
 	GetZonesByEventId(id int) ([]domain.Zone, error)
-	TakeZoneById(idEvent, idZone, userId uuid.UUID) ([]domain.Zone, error)
+	TakeZonesById(idEvent int, idZones []int, userId string) ([]domain.Zone, error)
 }
 
 type Repositories struct {
