@@ -24,15 +24,15 @@ type Admins interface {
 }
 
 type Users interface {
-	CreateUser(ctx context.Context, user domain.User) (uuid.UUID, error)
-	IsDuplicate(email, name string) bool
-	//GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
-	GetUserInfo(ctx context.Context, id uuid.UUID) (domain.User, error)
-	SetSession(ctx context.Context, userId uuid.UUID, session domain.Session) error
-	SerVerCode(ctx context.Context, code string) error
-	GetByRefreshToken(ctx context.Context, refreshToken string) (domain.User, error)
-	Verify(ctx context.Context, userId uuid.UUID, hash string) error
-	DeleteIfNotVer(id uuid.UUID)
+	CreateUser(ctx context.Context, user domain.User) (string, error)
+	IsDuplicate(email string) bool
+	GetUserEmail(ctx context.Context, id string) (string, error)
+	GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
+	SetSession(ctx context.Context, id string, session domain.Session) error
+	SetVerCode(ctx context.Context, id, code string) error
+	GetByRefreshToken(ctx context.Context, refreshToken string) (string, error)
+	Verify(ctx context.Context, id, hash string) error
+	DeleteIfNotVer(id string)
 }
 
 type Events interface {

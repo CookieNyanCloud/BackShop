@@ -125,12 +125,13 @@ func (h *Handler) userVerify(c *gin.Context) {
 }
 
 func (h *Handler) getOwnInfo(c *gin.Context) {
-	userId := getUserId(c)
-	user, err := h.services.Users.GetUserInfo(c, userId)
+	id := getUserId(c)
+	user, err := h.services.Users.GetUserEmail(c, id)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	//todo:users events and zones
 	c.JSON(http.StatusOK, userInfoResponse{
 		user,
 	})

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/cookienyancloud/back/internal/repository"
 	"github.com/cookienyancloud/back/pkg/auth"
@@ -49,21 +48,29 @@ func (s *UsersService) SignUp(ctx context.Context, input UserSignUpInput) error 
 	if err != nil {
 		return err
 	}
+
 	verificationCode := s.otpGenerator.RandomSecret(s.verificationCodeLength)
 	user := domain.User{
 		Password: passwordHash,
 		Email:    input.Email,
 	}
-	if _, err := s.repo.CreateUser(ctx, user); err != nil {
-		if err == repository.ErrUserAlreadyExists {
-			return errUserAlreadyExists
-		}
+	var id string
+	if id, err = s.repo.CreateUser(ctx, user); err != nil {
 		return err
 	}
-	return s.emailService.SendUserVerificationEmail(VerificationEmailInput{
+
+	if err = s.repo.SetVerCode(ctx, id, verificationCode); err != nil {
+		//todo:delete user
+		return err
+	}
+
+	if err = s.emailService.SendUserVerificationEmail(VerificationEmailInput{
 		Email:            user.Email,
 		VerificationCode: verificationCode,
-	})
+	}); err != nil {
+		//todo:delete user and code
+		return err
+	}
 	return nil
 }
 
@@ -72,34 +79,32 @@ func (s *UsersService) SignIn(ctx context.Context, input UserSignInInput) (Token
 	if err != nil {
 		return Tokens{}, err
 	}
-	user, err := s.repo.GetByCredentials(ctx, input.Email, passwordHash)
-	if err != nil {
-		if err == repository.ErrUserNotFound {
-			return Tokens{}, errUserNotFound
-		}
-	}
-	return s.createSession(ctx, user.ID)
-}
-
-func (s *UsersService) RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error) {
-	user, err := s.repo.GetByRefreshToken(ctx, refreshToken)
+	id, err := s.repo.GetByCredentials(ctx, input.Email, passwordHash)
 	if err != nil {
 		return Tokens{}, err
 	}
-	return s.createSession(ctx, user.ID)
+	return s.createSession(ctx, id)
 }
 
-func (s *UsersService) createSession(ctx context.Context, userId string) (Tokens, error) {
+func (s *UsersService) RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error) {
+	id, err := s.repo.GetByRefreshToken(ctx, refreshToken)
+	if err != nil {
+		return Tokens{}, err
+	}
+	return s.createSession(ctx, id)
+}
+
+func (s *UsersService) createSession(ctx context.Context, id string) (Tokens, error) {
 	var (
 		res Tokens
 		err error
 	)
 
-	res.AccessToken, err = s.tokenManager.NewJWT(userId, s.accessTokenTTL)
+	res.AccessToken, err = s.tokenManager.NewJWT(id, s.accessTokenTTL)
 	if err != nil {
 		return res, err
 	}
-
+	//todo:better refresh
 	res.RefreshToken, err = s.tokenManager.NewRefreshToken()
 	if err != nil {
 		return res, err
@@ -110,27 +115,22 @@ func (s *UsersService) createSession(ctx context.Context, userId string) (Tokens
 		ExpiresAt:    time.Now().Add(s.refreshTokenTTL),
 	}
 
-	err = s.repo.SetSession(ctx, userId, session)
+	err = s.repo.SetSession(ctx, id, session)
 
 	return res, err
 }
 
-func (s *UsersService) GetUserInfo(ctx context.Context, id string) (domain.User, error) {
-	user, err := s.repo.GetUserInfo(ctx, id)
+func (s *UsersService) GetUserEmail(ctx context.Context, id string) (string, error) {
+	email, err := s.repo.GetUserEmail(ctx, id)
 	if err != nil {
-		if err == repository.ErrUserNotFound {
-			return domain.User{}, ErrUserNotFound
-		}
+		return "", err
 	}
-	return user, nil
+	return email, nil
 }
 
-func (s *UsersService) Verify(ctx context.Context, userId , hash string) error {
-	err := s.repo.Verify(ctx, userId, hash)
+func (s *UsersService) Verify(ctx context.Context, id, hash string) error {
+	err := s.repo.Verify(ctx, id, hash)
 	if err != nil {
-		if errors.Is(err, repository.ErrVerificationCodeInvalid) {
-			return err
-		}
 		return err
 	}
 	return nil
