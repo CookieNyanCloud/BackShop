@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/jmoiron/sqlx"
@@ -16,7 +17,7 @@ func NewEventsRepo(db *sqlx.DB) *EventsRepo {
 	return &EventsRepo{db: db}
 }
 
-func (r *EventsRepo) GetEventById(id int) (domain.Event, error) {
+func (r *EventsRepo) GetEventById(ctx context.Context,id int) (domain.Event, error) {
 	var event domain.Event
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1",
 		eventsTable)
@@ -27,7 +28,7 @@ func (r *EventsRepo) GetEventById(id int) (domain.Event, error) {
 	return event, err
 }
 
-func (r *EventsRepo) GetAllEvents() ([]domain.Event, error) {
+func (r *EventsRepo) GetAllEvents(ctx context.Context) ([]domain.Event, error) {
 	var events []domain.Event
 	query := fmt.Sprintf("SELECT * FROM %s",
 		eventsTable)

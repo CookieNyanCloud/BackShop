@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -16,11 +17,19 @@ const (
 	verificationTable = "verification"
 )
 
+var (
+	errUserAlreadyExists       = errors.New("user with such email already exists")
+	errUserNotFound            = errors.New("user doesn't exists")
+	errVerificationCodeInvalid = errors.New("verification code is invalid")
+)
+
 type Admins interface {
-	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
-	SetSession(ctx context.Context, userId uuid.UUID, session domain.Session) error
-	GetByRefreshToken(ctx context.Context, refreshToken string) (domain.User, error)
-	CreateEvent(time time.Time, description string, zones []domain.Zone) (int, error)
+	Users
+	IsAdmin(ctx context.Context, id string) (bool, error)
+	CreateEvent(ctx context.Context, event domain.Event) error
+	DeleteEvent(ctx context.Context, id int) error
+	DeleteUser(ctx context.Context, id string) error
+	ChangeEvent(ctx context.Context, id int, event domain.Event) error
 }
 
 type Users interface {
@@ -36,13 +45,13 @@ type Users interface {
 }
 
 type Events interface {
-	GetEventById(id int) (domain.Event, error)
-	GetAllEvents() ([]domain.Event, error)
+	GetEventById(ctx context.Context, id int) (domain.Event, error)
+	GetAllEvents(ctx context.Context) ([]domain.Event, error)
 }
 
 type Zones interface {
-	GetZonesByEventId(id int) ([]domain.Zone, error)
-	TakeZonesById(idEvent int, idZones []int, userId string) ([]domain.Zone, error)
+	GetZonesByEventId(ctx context.Context, id int) ([]domain.Zone, error)
+	TakeZonesById(ctx context.Context, idEvent int, idZones []int, userId string) ([]domain.Zone, error)
 }
 
 type Repositories struct {

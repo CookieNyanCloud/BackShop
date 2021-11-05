@@ -14,9 +14,7 @@ import (
 type AdminsService struct {
 	hasher       hash.PasswordHasher
 	tokenManager auth.TokenManager
-
 	repo       repository.Admins
-
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 }

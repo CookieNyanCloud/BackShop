@@ -7,15 +7,7 @@ import (
 	"net/http"
 )
 
-var (
-	errUserAlreadyExists       = errors.New("user with such email already exists")
-	errUserNotFound            = errors.New("user doesn't exists")
-	errVerificationCodeInvalid = errors.New("verification code is invalid")
 
-	noId            = "no id"
-	noCode          = "code is empty"
-	errInvalidInput = "invalid input body"
-)
 
 func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")

@@ -6,6 +6,8 @@ import (
 	emailProvider "github.com/cookienyancloud/back/pkg/email"
 )
 
+//todo:mail
+
 const (
 	nameField            = "name"
 	verificationLinkTmpl = "%s/verification?code=%s" // <frontend_url>/verification?code=<verification_code>

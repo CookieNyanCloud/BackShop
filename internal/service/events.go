@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/cookienyancloud/back/internal/repository"
 )
@@ -14,10 +15,10 @@ func NewEventsService(repo repository.Events, zones repository.Zones) *EventsSer
 	return &EventsService{repo, zones}
 }
 
-func (s *EventsService) GetEvent() ([]domain.Event, error) {
-	return s.repo.GetAllEvents()
+func (s *EventsService) GetEvents(ctx context.Context) ([]domain.Event, error) {
+	return s.repo.GetAllEvents(ctx)
 }
 
-func (s *EventsService) GetEventById(id int) (domain.Event, error) {
-	return s.repo.GetEventById(id)
+func (s *EventsService) GetEventById(ctx context.Context,id int) (domain.Event, error) {
+	return s.repo.GetEventById(ctx,id)
 }

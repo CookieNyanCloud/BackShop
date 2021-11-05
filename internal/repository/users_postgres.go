@@ -2,16 +2,11 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"time"
-)
-
-var (
-	errUserAlreadyExists = errors.New("user with such email already exists")
 )
 
 type UsersRepo struct {
@@ -116,14 +111,14 @@ func (r *UsersRepo) Verify(ctx context.Context, id string, hash string) error {
 	query := fmt.Sprintf("SELECT code FROM %s WHERE id=$1", verificationTable)
 	err := r.db.Get(&code, query, id)
 	if err != nil {
-		return ErrUserNotFound
+		return errUserNotFound
 	}
 	if code == hash {
 		query := fmt.Sprintf("UPDATE %s SET state = $1 WHERE id = $2",
 			usersTable)
 		_, err = r.db.Exec(query, true, id)
 		if err != nil {
-			return ErrUserNotFound
+			return errUserNotFound
 		}
 	} else {
 		return err

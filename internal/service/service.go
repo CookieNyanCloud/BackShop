@@ -62,13 +62,13 @@ type Admins interface {
 }
 
 type Events interface {
-	GetEvent() ([]domain.Event, error)
-	GetEventById(id int) (domain.Event, error)
+	GetEvents(ctx context.Context) ([]domain.Event, error)
+	GetEventById(ctx context.Context,id int) (domain.Event, error)
 }
 
 type Zones interface {
-	GetZonesByEventId(id int) ([]domain.Zone, error)
-	TakeZoneById(idEvent int, idZones []int, userId string) ([]domain.Zone, error)
+	GetZonesByEventId(ctx context.Context,id int) ([]domain.Zone, error)
+	TakeZonesById(ctx context.Context,idEvent int, idZones []int, userId string) ([]domain.Zone, error)
 }
 
 type Emails interface {
