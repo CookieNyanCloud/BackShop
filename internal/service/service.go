@@ -24,23 +24,17 @@ type UserSignInInput struct {
 	Password string
 }
 
+type CreateEventInput struct {
+	Time        time.Time     `json:"time" db:"time"`
+	Description string        `json:"description" db:"description"`
+	MapFile     string        `json:"mapfile" db:"mapfile"`
+	Zones       []domain.Zone `json:"zones" db:"zones"`
+}
+
 type VerificationEmailInput struct {
 	Email            string
 	VerificationCode string
 }
-
-//type PurchaseSuccessfulEmailInput struct {
-//	Email   string
-//	EventId string
-//	ZonesId  string
-//}
-
-//type CreateEventInput struct {
-//	Time        time.Time     `json:"time" db:"time"`
-//	Description string        `json:"description" db:"description"`
-//	//MapFile     string        `json:"mapfile" db:"mapfile"`
-//	Zones       []domain.Zone `json:"zones" db:"zones"`
-//}
 
 type Tokens struct {
 	AccessToken  string
@@ -58,17 +52,27 @@ type Users interface {
 type Admins interface {
 	SignIn(ctx context.Context, input UserSignInInput) (Tokens, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
-	//CreateEvent(input CreateEventInput) (int, error)
+	CreateEvent(ctx context.Context, input CreateEventInput) error
+	createSession(ctx context.Context, adminId string) (Tokens, error)
+	//GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
+	//SetSession(ctx context.Context, id string, session domain.Session) error
+	//GetByRefreshToken(ctx context.Context, refreshToken string) (string, error)
+	//IsDuplicate(email string) bool
+	//IsAdmin(ctx context.Context, id string) (bool, error)
+	//AddNewAdmin(ctx context.Context, email, passwordHash string) error
+	//DeleteEvent(ctx context.Context, id int) error
+	//DeleteUser(ctx context.Context, id string) error
+	//ChangeEvent(ctx context.Context, id int, event domain.Event) error
 }
 
 type Events interface {
 	GetEvents(ctx context.Context) ([]domain.Event, error)
-	GetEventById(ctx context.Context,id int) (domain.Event, error)
+	GetEventById(ctx context.Context, id int) (domain.Event, error)
 }
 
 type Zones interface {
-	GetZonesByEventId(ctx context.Context,id int) ([]domain.Zone, error)
-	TakeZonesById(ctx context.Context,idEvent int, idZones []int, userId string) ([]domain.Zone, error)
+	GetZonesByEventId(ctx context.Context, id int) ([]domain.Zone, error)
+	TakeZonesById(ctx context.Context, idEvent int, idZones []int, userId string) ([]domain.Zone, error)
 }
 
 type Emails interface {

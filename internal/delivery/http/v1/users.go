@@ -127,7 +127,7 @@ func (h *Handler) userVerify(c *gin.Context) {
 
 func (h *Handler) getOwnInfo(c *gin.Context) {
 	id := getUserId(c)
-	user, err := h.services.Users.GetUserEmail(c, id)
+	user, err := h.services.Users.GetUserEmail(c.Request.Context(), id)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

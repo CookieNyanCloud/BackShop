@@ -2,10 +2,19 @@ package v1
 
 import (
 	"errors"
+	"github.com/cookienyancloud/back/internal/domain"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
+
+type createEventInput struct {
+	Time        time.Time     `json:"time" db:"time"`
+	Description string        `json:"description" db:"description"`
+	MapFile     string        `json:"mapfile" db:"mapfile"`
+	Zones       []domain.Zone `json:"zones" db:"zones"`
+}
 
 func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 	admins := api.Group("/admin")
@@ -15,8 +24,8 @@ func (h *Handler) initAdminRoutes(api *gin.RouterGroup) {
 		authenticated := admins.Group("/", h.adminIdentity)
 		{
 			authenticated.POST("/create-event", h.adminCreateEvent)
-			//authenticated.DELETE("/:id", h.adminDeleteCourse)
-			//authenticated.PUT("/:id", h.adminUpdateEvent)
+			//authenticated.DELETE("/:id", h.adminDeleteEvent)
+			//authenticated.PUT("/:id", h.adminChangeEvent)
 		}
 	}
 }
@@ -32,7 +41,7 @@ func (h *Handler) adminSignIn(c *gin.Context) {
 		Password: inp.Password,
 	})
 	if err != nil {
-		if errors.Is(err, service.ErrUserNotFound) {
+		if errors.Is(err, errUserNotFound) {
 			newResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -62,24 +71,22 @@ func (h *Handler) adminRefresh(c *gin.Context) {
 	})
 }
 
-//type createEventInput struct {
-//	Time        time.Time     `json:"time" db:"time"`
-//	Description string        `json:"description" db:"description"`
-//	//MapFile     string        `json:"mapfile" db:"mapfile"`
-//	Zones       []domain.Zone `json:"zones" db:"zones"`
-//}
-
 func (h *Handler) adminCreateEvent(c *gin.Context) {
-	var inp service.CreateEventInput
+	var inp createEventInput
 	if err := c.BindJSON(&inp); err != nil {
 		newResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
-	id, err := h.services.Admins.CreateEvent(inp)
+	err := h.services.Admins.CreateEvent(c.Request.Context(), service.CreateEventInput{
+		Time:        inp.Time,
+		Description: inp.Description,
+		MapFile:     inp.MapFile,
+		Zones:       inp.Zones,
+	})
 	if err != nil {
 		newResponse(c, http.StatusBadRequest, "cold not create event")
 		return
 	}
-	c.JSON(http.StatusCreated, idResponse{id})
+	c.JSON(http.StatusCreated, idResponse{"success"})
 
 }

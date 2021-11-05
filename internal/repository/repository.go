@@ -4,13 +4,12 @@ import (
 	"context"
 	"errors"
 	"github.com/cookienyancloud/back/internal/domain"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"time"
 )
 
 const (
 	usersTable        = "users"
+	adminsTable       = "admins"
 	zonesTable        = "zones"
 	eventsTable       = "events"
 	sessionsTable     = "sessions"
@@ -24,9 +23,15 @@ var (
 )
 
 type Admins interface {
-	Users
+	GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
+	SetSession(ctx context.Context, id string, session domain.Session) error
+	GetByRefreshToken(ctx context.Context, refreshToken string) (string, error)
+	IsDuplicate(email string) bool
+
 	IsAdmin(ctx context.Context, id string) (bool, error)
+	AddNewAdmin(ctx context.Context, email, passwordHash string) error
 	CreateEvent(ctx context.Context, event domain.Event) error
+	AddZones(ctx context.Context, eventId int, zones []domain.Zone) error
 	DeleteEvent(ctx context.Context, id int) error
 	DeleteUser(ctx context.Context, id string) error
 	ChangeEvent(ctx context.Context, id int, event domain.Event) error
@@ -34,7 +39,6 @@ type Admins interface {
 
 type Users interface {
 	CreateUser(ctx context.Context, user domain.User) (string, error)
-	IsDuplicate(email string) bool
 	GetUserEmail(ctx context.Context, id string) (string, error)
 	GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
 	SetSession(ctx context.Context, id string, session domain.Session) error

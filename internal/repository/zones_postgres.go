@@ -25,6 +25,7 @@ func (r *ZonesRepo) GetZonesByEventId(ctx context.Context, id int) ([]domain.Zon
 
 func (r *ZonesRepo) TakeZonesById(ctx context.Context, idEvent int, idZones []int, userId string) ([]domain.Zone, error) {
 	//todo: payment
+	//todo: races
 	var zones []domain.Zone
 
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -43,7 +44,7 @@ func (r *ZonesRepo) TakeZonesById(ctx context.Context, idEvent int, idZones []in
 			return []domain.Zone{}, err
 		}
 
-		if zone.Taken == 0 {
+		if zone.Taken == "" {
 			query := fmt.Sprintf("UPDATE %s SET taken = $1 WHERE id = $2 AND eventid = $3",
 				zonesTable)
 			_, err = tx.ExecContext(ctx, query, userId, zoneId, idEvent)

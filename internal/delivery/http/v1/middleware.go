@@ -34,7 +34,14 @@ func (h *Handler) adminIdentity(c *gin.Context) {
 		println(err.Error())
 		newResponse(c, http.StatusUnauthorized, err.Error())
 	}
-
+	state, err := h.services.Admins.IsAdmin(c.Request.Context(), id)
+	if err != nil {
+		println(err.Error())
+		newResponse(c, http.StatusUnauthorized, err.Error())
+	}
+	if !state {
+		newResponse(c, http.StatusUnauthorized, "not an admin")
+	}
 	c.Set(adminCtx, id)
 }
 
