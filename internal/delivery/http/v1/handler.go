@@ -37,8 +37,7 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 	{
 		h.initUsersRoutes(v1)
 		h.initEventsRoutes(v1)
-		h.initCallbackRoutes(v1)
-		h.initAdminRoutes(v1)
+		h.initZonesRoutes(v1)
 		h.initCallbackRoutes(v1)
 		h.initAdminRoutes(v1)
 	}

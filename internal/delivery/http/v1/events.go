@@ -10,6 +10,7 @@ func (h *Handler) initEventsRoutes(api *gin.RouterGroup) {
 	Events := api.Group("/events", )
 	{
 		Events.GET("/all", h.getAllEvents)
+		Events.GET("/first", h.getFirstEvent)
 		Events.GET("/:idevent", h.getEventById)
 	}
 }
@@ -40,6 +41,22 @@ func (h *Handler) getEventById(c *gin.Context) {
 		return
 	}
 	event, err := h.services.Events.GetEventById(c,idEvent)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	zones, err := h.services.Zones.GetZonesByEventId(c,event.Id)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	event.Zones = zones
+	c.JSON(http.StatusOK, eventsResponse{event})
+
+}
+
+func (h *Handler) getFirstEvent(c *gin.Context) {
+	event, err := h.services.Events.GetFirstEvent(c)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return

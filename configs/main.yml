@@ -28,11 +28,11 @@ limiter:
 #  url: ams3.digitaloceanspaces.com
 #  bucket:
 
-#smtp:
-#  port: 587
-#  host: "smtp.gmail.com"
-#  from: "email123check@gmail.com"
-#
+smtp:
+  port: 587
+  host: "smtp.gmail.com"
+  from: "email123check@gmail.com"
+
 #email:
 #  templates:
 #    verification_email: "./templates/verification_email.html"

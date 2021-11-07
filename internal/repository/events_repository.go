@@ -17,11 +17,22 @@ func NewEventsRepo(db *sqlx.DB) *EventsRepo {
 	return &EventsRepo{db: db}
 }
 
-func (r *EventsRepo) GetEventById(ctx context.Context,id int) (domain.Event, error) {
+func (r *EventsRepo) GetEventById(ctx context.Context, id int) (domain.Event, error) {
 	var event domain.Event
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1",
 		eventsTable)
-	err := r.db.Select(&event, query,id)
+	err := r.db.Select(&event, query, id)
+	if err != nil {
+		return domain.Event{}, err
+	}
+	return event, err
+}
+
+func (r *EventsRepo) GetFirstEvent(ctx context.Context) (domain.Event, error) {
+	var event domain.Event
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY date LIMIT 1",
+		eventsTable)
+	err := r.db.Select(&event, query)
 	if err != nil {
 		return domain.Event{}, err
 	}

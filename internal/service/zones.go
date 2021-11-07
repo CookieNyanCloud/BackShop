@@ -14,10 +14,14 @@ func NewZonesService(repo repository.Zones) *ZonesService {
 	return &ZonesService{repo}
 }
 
-func (s *ZonesService) GetZonesByEventId(ctx context.Context,id int) ([]domain.Zone, error) {
-	return s.repo.GetZonesByEventId(ctx,id)
+func (s *ZonesService) GetZonesByEventId(ctx context.Context, id int) ([]domain.Zone, error) {
+	return s.repo.GetZonesByEventId(ctx, id)
 }
 
-func (s *ZonesService) TakeZonesById(ctx context.Context,idEvent int, idZones []int, userId string) ([]domain.Zone, error) {
-	return s.repo.TakeZonesById(ctx,idEvent, idZones, userId)
+func (s *ZonesService) TakeZonesById(ctx context.Context, idEvent int, idZones []int, userId string) ([]domain.Zone, error) {
+	return s.repo.TakeZonesById(ctx, idEvent, idZones, userId)
+}
+
+func (s *ZonesService) GetZonesByUserId(ctx context.Context, userId string) ([]domain.Zone, error) {
+	return s.repo.GetZonesByUserId(ctx, userId)
 }

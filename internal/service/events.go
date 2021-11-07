@@ -19,6 +19,10 @@ func (s *EventsService) GetEvents(ctx context.Context) ([]domain.Event, error) {
 	return s.repo.GetAllEvents(ctx)
 }
 
-func (s *EventsService) GetEventById(ctx context.Context,id int) (domain.Event, error) {
-	return s.repo.GetEventById(ctx,id)
+func (s *EventsService) GetEventById(ctx context.Context, id int) (domain.Event, error) {
+	return s.repo.GetEventById(ctx, id)
+}
+
+func (s *EventsService) GetFirstEvent(ctx context.Context) (domain.Event, error) {
+	return s.repo.GetFirstEvent(ctx)
 }

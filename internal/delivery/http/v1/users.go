@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-
+//todo:oidc
 
 func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
@@ -127,14 +127,20 @@ func (h *Handler) userVerify(c *gin.Context) {
 
 func (h *Handler) getOwnInfo(c *gin.Context) {
 	id := getUserId(c)
-	user, err := h.services.Users.GetUserEmail(c.Request.Context(), id)
+	userEmail, err := h.services.Users.GetUserEmail(c.Request.Context(), id)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	zones, err := h.services.Zones.GetZonesByUserId(c.Request.Context(), id)
 	if err != nil {
 		newResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	//todo:users events and zones
 	c.JSON(http.StatusOK, userInfoResponse{
-		user,
+		userEmail,
+		zones,
 	})
 
 }

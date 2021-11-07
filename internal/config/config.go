@@ -120,12 +120,6 @@ func Init(configsDir string, local bool) (*Config, error) {
 		return nil, err
 	}
 	setFromEnv(&cfg)
-	println(cfg.Postgres.DBName)
-	println(cfg.Postgres.SSLMode)
-	println(cfg.Postgres.Host)
-	println(cfg.Postgres.Password)
-	println(cfg.Postgres.Username)
-	println(cfg.Postgres.Port)
 	return &cfg, nil
 }
 
@@ -207,8 +201,6 @@ func setFromEnv(cfg *Config) {
 	cfg.HTTP.Host = viper.GetString("host")
 
 	cfg.SMTP.Pass = viper.GetString("pass")
-
-	cfg.Environment = viper.GetString("env")
 
 	cfg.Payment.Fondy.MerchantId = viper.GetString("merchant_id")
 	cfg.Payment.Fondy.MerchantPassword = viper.GetString("merchant_pass")

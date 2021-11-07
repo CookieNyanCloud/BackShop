@@ -23,6 +23,14 @@ func (r *ZonesRepo) GetZonesByEventId(ctx context.Context, id int) ([]domain.Zon
 	return zones, err
 }
 
+func (r *ZonesRepo) GetZonesByUserId(ctx context.Context, userId string) ([]domain.Zone, error) {
+	var zones []domain.Zone
+	query := fmt.Sprintf("SELECT * FROM %s WHERE taken= $1",
+		zonesTable)
+	err := r.db.Select(&zones, query, userId)
+	return zones, err
+}
+
 func (r *ZonesRepo) TakeZonesById(ctx context.Context, idEvent int, idZones []int, userId string) ([]domain.Zone, error) {
 	//todo: payment
 	//todo: races

@@ -36,7 +36,8 @@ type tokenResponse struct {
 }
 
 type userInfoResponse struct {
-	UserInfo interface{} `json:"userInfo"`
+	UserEmail string `json:"user_email"`
+	Zones []domain.Zone `json:"zones"`
 }
 
 func newResponse(c *gin.Context, statusCode int, message string) {

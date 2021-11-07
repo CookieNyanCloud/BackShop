@@ -35,7 +35,6 @@ func Run(configPath string, local bool) {
 		logger.Error(err)
 		return
 	}
-
 	dataBaseClient, err := postgres.NewClient(cfg.Postgres)
 	if err != nil {
 		logger.Error(err)
@@ -60,6 +59,7 @@ func Run(configPath string, local bool) {
 		logger.Error(err)
 		return
 	}
+	println("S")
 	tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		logger.Error(err)
