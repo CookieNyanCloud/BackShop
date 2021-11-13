@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -19,6 +20,7 @@ func (h *Handler) initUsersRoutes(api *gin.RouterGroup) {
 		authenticated := users.Group("/", h.userIdentity)
 		{
 			authenticated.POST("/verify/:code", h.userVerify)
+			authenticated.POST("/order", )
 			account := authenticated.Group("/account")
 			{
 				account.GET("/page", h.getOwnInfo)
@@ -39,6 +41,16 @@ type signInInput struct {
 
 type refreshInput struct {
 	Authorization string `header:"refreshToken" json:"refreshToken" binding:"required"`
+}
+
+type orderInput struct {
+	orderID uuid.UUID `json:"order_id"`
+	eventId int       `json:"event_id"`
+	zonesId []int     `json:"zones_id"`
+}
+
+type generatePaymentLinkResponse struct {
+	URL string `json:"url"`
 }
 
 func (h *Handler) signUp(c *gin.Context) {
@@ -143,4 +155,28 @@ func (h *Handler) getOwnInfo(c *gin.Context) {
 		zones,
 	})
 
+}
+
+func (h *Handler) studentCreateOrder(c *gin.Context) {
+	id := getUserId(c)
+	if id == "" {
+		newResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	var inp orderInput
+	if err := c.BindJSON(&inp); err != nil {
+		newResponse(c, http.StatusBadRequest, "invalid input body")
+		return
+	}
+	err := h.services.Orders.Create(c.Request.Context(), inp.orderID, id, inp.eventId, inp.zonesId)
+	if err != nil {
+		newResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	url, err := h.services.Payments.GeneratePaymentLink(c.Request.Context(), inp.orderID)
+	if err != nil {
+		newResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, generatePaymentLinkResponse{url})
 }

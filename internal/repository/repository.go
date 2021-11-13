@@ -14,6 +14,7 @@ const (
 	eventsTable       = "events"
 	sessionsTable     = "sessions"
 	verificationTable = "verification"
+	ordersTable       = "orders"
 )
 
 var (
@@ -60,7 +61,11 @@ type Zones interface {
 	GetZonesByUserId(ctx context.Context, userId string) ([]domain.Zone, error)
 }
 
+type Orders interface {
+}
+
 type Repositories struct {
+	Orders
 	Admins
 	Users
 	Events
@@ -69,6 +74,7 @@ type Repositories struct {
 
 func NewRepositories(db *sqlx.DB) *Repositories {
 	return &Repositories{
+		NewOrdersRepo(db),
 		NewAdminsRepo(db),
 		NewUsersRepo(db),
 		NewEventsRepo(db),

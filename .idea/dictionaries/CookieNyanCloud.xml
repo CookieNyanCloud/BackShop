@@ -6,6 +6,7 @@
       <w>fondy</w>
       <w>hasher</w>
       <w>imageurl</w>
+      <w>lastvisitat</w>
       <w>listid</w>
       <w>mapstructure</w>
       <w>refreshtoken</w>
@@ -13,6 +14,8 @@
       <w>smtp</w>
       <w>smtpm</w>
       <w>sslmode</w>
+      <w>tobepaid</w>
+      <w>tobetaken</w>
       <w>userid</w>
     </words>
   </dictionary>

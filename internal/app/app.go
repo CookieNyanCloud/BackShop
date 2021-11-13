@@ -16,7 +16,6 @@ import (
 	"github.com/cookienyancloud/back/pkg/logger"
 	"github.com/cookienyancloud/back/pkg/otp"
 	"github.com/cookienyancloud/back/pkg/payment/fondy"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,8 +26,9 @@ import (
 //todo: idempotent api
 //todo: cache
 
-
 func Run(configPath string, local bool) {
+
+	 logger:=logger.GetLogger()
 
 	cfg, err := config.Init(configPath, local)
 	if err != nil {
@@ -59,7 +59,6 @@ func Run(configPath string, local bool) {
 		logger.Error(err)
 		return
 	}
-	println("S")
 	tokenManager, err := auth.NewManager(cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		logger.Error(err)
@@ -86,7 +85,7 @@ func Run(configPath string, local bool) {
 		OtpGenerator:           otpGenerator,
 		VerificationCodeLength: cfg.Auth.VerificationCodeLength,
 	})
-	handlers := delivery.NewHandler(services,tokenManager)
+	handlers := delivery.NewHandler(services,tokenManager,logger)
 
 	// HTTP Server
 	srv := server.NewServer(cfg, handlers.Init(cfg))
@@ -115,7 +114,7 @@ func Run(configPath string, local bool) {
 	}
 
 	if err := dataBaseClient.Close(); err != nil {
-		logrus.Errorf("error occurred on db connection close: %s", err.Error())
+		logger.Errorf("error occurred on db connection close: %s", err.Error())
 	}
 
 }

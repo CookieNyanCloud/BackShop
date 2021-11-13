@@ -11,6 +11,7 @@ import (
 	"github.com/cookienyancloud/back/pkg/hash"
 	"github.com/cookienyancloud/back/pkg/otp"
 	"github.com/cookienyancloud/back/pkg/payment"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -55,14 +56,6 @@ type Admins interface {
 	CreateEvent(ctx context.Context, input CreateEventInput) error
 	createSession(ctx context.Context, adminId string) (Tokens, error)
 	IsAdmin(ctx context.Context, id string) (bool, error)
-	//GetByCredentials(ctx context.Context, email, passwordHash string) (string, error)
-	//SetSession(ctx context.Context, id string, session domain.Session) error
-	//GetByRefreshToken(ctx context.Context, refreshToken string) (string, error)
-	//IsDuplicate(email string) bool
-	//AddNewAdmin(ctx context.Context, email, passwordHash string) error
-	//DeleteEvent(ctx context.Context, id int) error
-	//DeleteUser(ctx context.Context, id string) error
-	//ChangeEvent(ctx context.Context, id int, event domain.Event) error
 }
 
 type Events interface {
@@ -81,7 +74,22 @@ type Emails interface {
 	SendUserVerificationEmail(VerificationEmailInput) error
 }
 
+type Payments interface {
+	GeneratePaymentLink(ctx context.Context, orderId) (string, error)
+	ProcessTransaction(ctx context.Context, callback interface{}) error
+}
+
+type Orders interface {
+	Create(ctx context.Context,orderId uuid.UUID, userId string, eventId int, zonesId []int) error
+	AddTransaction(ctx context.Context, id primitive.ObjectID, transaction domain.Transaction) (domain.Order, error)
+	GetBySchool(ctx context.Context, schoolId primitive.ObjectID, query domain.GetOrdersQuery) ([]domain.Order, int64, error)
+	GetById(ctx context.Context, id primitive.ObjectID) (domain.Order, error)
+	SetStatus(ctx context.Context, id primitive.ObjectID, status string) error
+}
+
 type Services struct {
+	Orders
+	Payments
 	Admins
 	Users
 	Events
@@ -138,7 +146,11 @@ func NewServices(deps Deps) *Services {
 		deps.Repos.Events,
 		deps.Repos.Zones,
 	)
+	OrdersService := NewOrdersService(
+		deps.Repos.Orders,
+	)
 	return &Services{
+		OrdersService,
 		adminsService,
 		usersService,
 		eventsService,

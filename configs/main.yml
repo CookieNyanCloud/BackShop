@@ -4,15 +4,12 @@ http:
   readTimeout: 10s
   writeTimeout: 10s
 
-
-
 postgres:
   host:     "localhost"
   port:     "5432"
   username: "postgres"
   dbname:   "postgres"
   SSLMode:  "disable"
-
 
 auth:
   accessTokenTTL: 15m

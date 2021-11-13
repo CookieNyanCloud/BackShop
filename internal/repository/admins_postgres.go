@@ -104,7 +104,6 @@ func (r *AdminsRepo) ChangeEvent(ctx context.Context, id int, event domain.Event
 	return nil
 }
 
-
 func (r *AdminsRepo) IsDuplicate(email string) bool {
 	var id string
 	query := fmt.Sprintf("SELECT id FROM %s WHERE email='$1'", usersTable)

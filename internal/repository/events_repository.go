@@ -19,8 +19,7 @@ func NewEventsRepo(db *sqlx.DB) *EventsRepo {
 
 func (r *EventsRepo) GetEventById(ctx context.Context, id int) (domain.Event, error) {
 	var event domain.Event
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1",
-		eventsTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", eventsTable)
 	err := r.db.Select(&event, query, id)
 	if err != nil {
 		return domain.Event{}, err
@@ -30,15 +29,14 @@ func (r *EventsRepo) GetEventById(ctx context.Context, id int) (domain.Event, er
 
 func (r *EventsRepo) GetFirstEvent(ctx context.Context) (domain.Event, error) {
 	var event domain.Event
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY date LIMIT 1",
-		eventsTable)
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY 'date' LIMIT 1", eventsTable)
 	err := r.db.Select(&event, query)
 	if err != nil {
 		return domain.Event{}, err
 	}
 	return event, err
 }
-
+//todo:pagination
 func (r *EventsRepo) GetAllEvents(ctx context.Context) ([]domain.Event, error) {
 	var events []domain.Event
 	query := fmt.Sprintf("SELECT * FROM %s",

@@ -6,6 +6,7 @@ import (
 	"github.com/cookienyancloud/back/internal/service"
 	"github.com/cookienyancloud/back/pkg/auth"
 	"github.com/cookienyancloud/back/pkg/limiter"
+	"github.com/cookienyancloud/back/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,19 +14,20 @@ import (
 type Handler struct {
 	services     *service.Services
 	tokenManager auth.TokenManager
+	logger       logger.Logger
 }
 
-func NewHandler(services *service.Services, tokenManager auth.TokenManager) *Handler {
+func NewHandler(services *service.Services, tokenManager auth.TokenManager, logger logger.Logger) *Handler {
 	return &Handler{
 		services:     services,
 		tokenManager: tokenManager,
+		logger:       logger,
 	}
 }
 
 func (h *Handler) Init(cfg *config.Config) *gin.Engine {
 	// Init gin handler
 	router := gin.Default()
-
 	router.Use(
 		gin.Recovery(),
 		gin.Logger(),
